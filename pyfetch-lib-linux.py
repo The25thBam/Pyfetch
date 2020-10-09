@@ -1,3 +1,4 @@
+#!/usr/bin/python
 '''This module is dedicated to fetch system data from Linux systems'''
 from subprocess import check_output
 
@@ -10,7 +11,7 @@ def fcpu():
             # Checks if the current line has the "model name" parameter
             if "model name" in parameter:
                 # Parses the CPUs name from the "model name" parameter
-                cpu = parameter.split(":")[1][1:]
+                cpu = parameter.split(":")[1][1:].rstrip("\n")
                 return cpu
     return -1
 
@@ -19,12 +20,14 @@ def fdevice():
     # Tries to open /sys/devices/virtual/dmi/id/product_name and returns the device name from it
     try:
         with open("/sys/devices/virtual/dmi/id/product_name", "rt") as device:
-            return device.readline()
+            motherboard = device.readline().rstrip()
+            return motherboard
     # If the previous file is not found or is not readable it will try to do the same with:
     # /sys/firmware/devicetree/base/model/
     except (FileNotFoundError, OSError):
         with open("/sys/firmware/devicetree/base/model", "rt") as device:
-            return device.readline()
+            motherboard = device.readline().rstrip()
+            return motherboard
 
 def parse_distro(file):
     '''Returns the name of a distro from the inputed file as long as it is an os-release file'''
@@ -35,7 +38,7 @@ def parse_distro(file):
             # If the line is the one that has the pretty name of the distro returns it
             if "PRETTY_NAME" in line:
                 # Parses the distro name
-                distro_name = line.split("=")[1].replace("\"", "")
+                distro_name = line.split("=")[1].replace("\"", "").rstrip()
                 return distro_name
     return -1
 
@@ -64,3 +67,7 @@ def fdistro():
                 return distro_name
 
     return -1
+
+print(fcpu())
+print(fdevice())
+print(fdistro())
