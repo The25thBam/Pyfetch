@@ -68,6 +68,37 @@ def fdistro():
 
     return -1
 
-print(fcpu())
-print(fdevice())
-print(fdistro())
+def fuptime():
+    '''returns the current uptime in a stylish way'''
+    # declare days, hours and minutes
+    days = 0
+    hours = 0
+    minutes = 0
+    # opens /proc/uptime
+    try:
+        with open("/proc/uptime", "rt") as up_file:
+            # parse uptime
+            uptime = int(up_file.readline().split()[0].split(".")[0])
+            # calculate days
+            if uptime >= 86400:
+                days = uptime//86400
+                uptime -= 86400*days
+                days = str(days)+"d"
+            # calculate hours 
+            if uptime >= 3600:
+                hours = uptime//3600
+                uptime -= 3600*hours
+                hours = str(hours)+"h"
+            # calculate minutes
+            if uptime >= 60:
+                minutes = uptime//60
+                minutes = str(minutes)+"m"
+            # prepare the output text
+            time = [days, hours, minutes]
+            for unit in time:
+                if str(unit) == "0":
+                    time.pop(time.index(unit))
+            uptime = " ".join(time)
+            return uptime
+    except (FileNotFoundError, OSError):
+        return -1
